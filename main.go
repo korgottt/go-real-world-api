@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
-	"realworldapi/server"
+
+	"github.com/korgottt/go-real-world-api/server"
 )
 
 func main() {

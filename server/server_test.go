@@ -6,16 +6,16 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"realworldapi/model"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/korgottt/go-real-world-api/model"
 	"github.com/stretchr/testify/assert"
 )
 
 type StubArticlesStore struct {
-	data            []model.Article
+	data []model.Article
 }
 
 func (s *StubArticlesStore) GetArticle(slug string) (article model.Article, e error) {

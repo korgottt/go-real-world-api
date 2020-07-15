@@ -1,8 +1,6 @@
 package server
 
-import (
-	"realworldapi/model"
-)
+import "github.com/korgottt/go-real-world-api/model"
 
 //InMemoryStore collects data about articles in memory.
 type InMemoryStore struct {
