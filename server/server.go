@@ -7,8 +7,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"realworldapi/model"
 	"strings"
+
+	"github.com/korgottt/go-real-world-api/model"
 )
 
 var defaultUserInfo = `{

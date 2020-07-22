@@ -2,11 +2,12 @@ package model
 
 //User represent table model of users
 type User struct {
-	UserName string `json:"username"`
-	Email    string `json:"email"`
-	Token    string `json:"token"`
-	Password string `json:"password"`
-	Bio      string `json:"bio"`
+	ID       int    `json:"id" db:"id"`
+	UserName string `json:"username" db:"username"`
+	Email    string `json:"email" db:"email"`
+	Token    string `json:"token" db:"token"`
+	Password string `json:"password" db:"password"`
+	Bio      string `json:"bio" db:"bio"`
 }
 
 //SingleUserWrap is http request/response model for single user
@@ -16,8 +17,9 @@ type SingleUserWrap struct {
 
 //Article represent table model of articles
 type Article struct {
-	Slug  string `json:"slug"`
-	Title string `json:"title"`
+	ID    int    `json:"id" db:"id"`
+	Slug  string `json:"slug" db:"slug"`
+	Title string `json:"title" db:"title"`
 }
 
 //SingleArticleWrap is http request/response model for single user
