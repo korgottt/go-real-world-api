@@ -117,10 +117,12 @@ func TestPOSTuser(t *testing.T) {
 func TestArticles(t *testing.T) {
 	tt := []model.Article{
 		{
+			1,
 			"slug-1",
 			"title-1",
 		},
 		{
+			2,
 			"slug-2",
 			"title-2",
 		},
