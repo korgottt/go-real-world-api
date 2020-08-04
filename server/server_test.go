@@ -15,12 +15,13 @@ import (
 )
 
 type StubArticlesStore struct {
-	data []model.Article
+	articleData []model.Article
+	userData    []model.User
 }
 
 func (s *StubArticlesStore) GetArticle(slug string) (article model.Article, e error) {
 	e = fmt.Errorf("Article with slug %s was not found", slug)
-	for _, a := range s.data {
+	for _, a := range s.articleData {
 		if a.Slug == slug {
 			article = a
 			e = nil
@@ -32,6 +33,10 @@ func (s *StubArticlesStore) GetArticle(slug string) (article model.Article, e er
 
 func (s *StubArticlesStore) CreateArticle(a model.SingleArticleWrap) (article model.Article, e error) {
 	return a.Article, nil
+}
+
+func (s *StubArticlesStore) GetUser(name string) (model.User, error) {
+	panic("not implemented") // TODO: Implement
 }
 
 func TestGETUsers(t *testing.T) {
@@ -128,7 +133,7 @@ func TestArticles(t *testing.T) {
 		},
 	}
 
-	server := NewGlobalServer(&StubArticlesStore{tt})
+	server := NewGlobalServer(&StubArticlesStore{tt, nil})
 	for _, tc := range tt {
 
 		t.Run("returns articles struct", func(t *testing.T) {
@@ -159,7 +164,7 @@ func TestArticles(t *testing.T) {
 
 func createPostArticleRequest(a model.Article) *http.Request {
 	serializedArticle, _ := json.Marshal(model.SingleArticleWrap{Article: a})
-	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/api/articles"), bytes.NewBuffer(serializedArticle))
+	req, _ := http.NewRequest(http.MethodPost, fmt.Sprint("/api/articles"), bytes.NewBuffer(serializedArticle))
 	return req
 }
 
@@ -191,5 +196,32 @@ func assertJSONBody(t *testing.T, got string, want interface{}) {
 	}
 	if !reflect.DeepEqual(got, builder.String()) {
 		t.Errorf("response %v not equal %v", got, builder.String())
+	}
+}
+
+func TestStubArticlesStore_GetUser(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name    string
+		s       *StubArticlesStore
+		args    args
+		want    model.User
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.s.GetUser(tt.args.name)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StubArticlesStore.GetUser() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("StubArticlesStore.GetUser() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

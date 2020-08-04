@@ -2,10 +2,10 @@ package server
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/korgottt/go-real-world-api/model"
+	"github.com/korgottt/go-real-world-api/utils"
 	_ "github.com/lib/pq" // db driver
 )
 
@@ -26,7 +26,7 @@ const schema = `
 	);
 `
 
-const connStr = "user=postgres password=admin dbname=postgres sslmode=disable"
+const ConnStr = "user=postgres password=admin dbname=postgres sslmode=disable"
 
 // ArticleDBStore is implementation of article store via Postgres
 type ArticleDBStore struct {
@@ -35,7 +35,7 @@ type ArticleDBStore struct {
 
 // Init initializes connetion
 func (s *ArticleDBStore) Init() (err error) {
-	s.db, err = sqlx.Connect("postgres", connStr)
+	s.db, err = sqlx.Connect("postgres", ConnStr)
 	s.db.MustExec(schema)
 	return
 }
@@ -49,10 +49,10 @@ func (s *ArticleDBStore) Close() (err error) {
 	return
 }
 
-func (s *ArticleDBStore) ensureConnection() (isConnected bool, e error) {
+func (s *ArticleDBStore) ensureConnection() (isConnected bool, err error) {
 	isConnected = s.db != nil
 	if !isConnected {
-		e = fmt.Errorf("db connection is not initialized")
+		err = fmt.Errorf("db connection is not initialized")
 	}
 	return
 }
@@ -65,16 +65,37 @@ func (s *ArticleDBStore) GetArticle(slug string) (article model.Article, e error
 }
 
 // CreateArticle creates article in db
-func (s *ArticleDBStore) CreateArticle(a model.SingleArticleWrap) (article model.Article, e error) {
-	if isConnected, e := s.ensureConnection(); !isConnected {
-		return article, e
+func (s *ArticleDBStore) CreateArticle(a model.SingleArticleWrap) (article model.Article, err error) {
+	if isConnected, err := s.ensureConnection(); !isConnected {
+		return article, err
 	}
-	a.Article.Slug = CreateSlug(a.Article.Title)
-	_, err := s.db.Exec("INSERT INTO article (slug, title) VALUES ($1, $2)", a.Article.Slug, a.Article.Title)
+	a.Article.Slug = utils.CreateSlug(a.Article.Title)
+	_, err = s.db.Exec("INSERT INTO article (slug, title) VALUES ($1, $2)", a.Article.Slug, a.Article.Title)
 	return a.Article, err
 }
 
-// CreateSlug creates article slug from title
-func CreateSlug(title string) string {
-	return strings.ToLower(strings.Join(strings.Fields(title), "-"))
+//GetUser return curent user information
+func (s *ArticleDBStore) GetUser(name string) (user model.User, err error) {
+	if isConnected, err := s.ensureConnection(); !isConnected {
+		return model.User{}, err
+	}
+	err = s.db.Get(&user, "SELECT * FROM users WHERE name=$1", name)
+	return user, err
+}
+
+//RegUser create new user in db
+func (s *ArticleDBStore) RegUser(data model.User) (model.User, error) {
+	if isConnected, err := s.ensureConnection(); !isConnected {
+		return model.User{}, err
+	}
+	_, err := s.db.Exec("INSERT INTO users (name, password, email, bio, image) VALUES ($1, $2, $3, $4, $5)",
+		data.UserName, data.Password, data.Email, data.Bio, data.Image)
+	return data, err
+}
+
+//UpdateUser update user info by user name
+func (s *ArticleDBStore) UpdateUser(username string, data model.SingleUserWrap) (model.SingleUserWrap, error) {
+	_, err := s.db.Exec("UPDATE users SET username=$1, password=$2, email=$3, bio=$4, image=$5 WHERE username=$6",
+		data.User.UserName, data.User.Password, data.User.Email, data.User.Bio, data.User.Image, username)
+	return data, err
 }
